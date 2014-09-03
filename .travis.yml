@@ -8,7 +8,7 @@ env:
     laas/abstract-robot-dynamics jrl-umi3218/jrl-dynamics
     stack-of-tasks/dynamic-graph stack-of-tasks/dynamic-graph-python
     stack-of-tasks/sot-core"
-  - ROS_VERSION=hydro
+  - ROS_DISTRO=hydro
   - ROS_GIT_DEPENDENCIES="francois-keith/dynamic_graph_bridge_msgs:catkin"
   - ALLOW_CATKINLINT_FAILURE=true
 notifications:

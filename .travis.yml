@@ -1,0 +1,26 @@
+language: cpp
+compiler: gcc
+env:
+  global:
+  - APT_DEPENDENCIES="doxygen doxygen-latex libboost-all-dev libeigen3-dev liblapack-dev
+    libblas-dev gfortran python-dev python-sphinx python-numpy libbullet-dev"
+  - GIT_DEPENDENCIES="jrl-umi3218/jrl-mathtools jrl-umi3218/jrl-mal
+    laas/abstract-robot-dynamics jrl-umi3218/jrl-dynamics
+    stack-of-tasks/dynamic-graph stack-of-tasks/dynamic-graph-python
+    stack-of-tasks/sot-core"
+  - ROS_VERSION=hydro
+  - ROS_GIT_DEPENDENCIES="francois-keith/dynamic_graph_bridge_msgs:catkin"
+  - ALLOW_CATKINLINT_FAILURE=true
+notifications:
+  email:
+  - francois.keith@gmail.com
+branches:
+  only:
+  - master
+  - catkin
+  - travis
+script: ./.travis/run build
+after_success: ./.travis/run after_success
+after_failure: ./.travis/run after_failure
+before_install: ./.travis/run dependencies/catkin; ./.travis/run before_install
+

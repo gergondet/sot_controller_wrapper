@@ -3,7 +3,7 @@ compiler: gcc
 env:
   global:
   - APT_DEPENDENCIES="doxygen doxygen-latex libboost-all-dev libeigen3-dev liblapack-dev
-    libblas-dev gfortran python-dev python-sphinx python-numpy libbullet-dev"
+    libblas-dev gfortran python-dev python-sphinx python-numpy"
   - GIT_DEPENDENCIES="jrl-umi3218/jrl-mathtools jrl-umi3218/jrl-mal
     laas/abstract-robot-dynamics jrl-umi3218/jrl-dynamics
     stack-of-tasks/dynamic-graph stack-of-tasks/dynamic-graph-python

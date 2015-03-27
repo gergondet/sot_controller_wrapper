@@ -20,7 +20,8 @@ enum ROBOT
 {
   PR2,
   HRP4,
-  ROMEO
+  ROMEO,
+  BOXY
 };
 /** \brief Config variables
  */
@@ -137,10 +138,13 @@ class MinimalStackOfTasks
   bool initialize_library_;
 
 public:
-  //TODO:
   void setPosition(const std::vector<double> & pos);
 
   std::vector<double> position_;
+
+  void setOdometry(const std::vector<double> & odom);
+
+  std::vector<double> odometry_;
 };
 
 #endif // RTC_STACK_OF_TASKS_H

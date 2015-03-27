@@ -48,6 +48,10 @@ DebugFile << x << std::endl; \
           DebugFile.close();}
 
 
+#include <sensor_msgs/JointState.h>
+#include <nav_msgs/Odometry.h>
+#include <tf2/LinearMath/Matrix3x3.h>
+
 
 MinimalStackOfTasks::MinimalStackOfTasks()
     // <rtc-template block="initializer">
@@ -69,6 +73,11 @@ void MinimalStackOfTasks::setRobot(ROBOT robot)
   {
     ROS_INFO("Using the PR2 robot");
     robot_config_.libname="libsot_pr2.so";
+  }
+  else if (robot == BOXY)
+  {
+    ROS_INFO("Using the Boxy robot");
+    robot_config_.libname="libsot_boxy.so";
   }
   else if (robot == HRP4)
   {
@@ -181,13 +190,23 @@ void MinimalStackOfTasks::setPosition(const std::vector<double> & pos)
   position_ = pos;
 }
 
+void MinimalStackOfTasks::setOdometry(const std::vector<double> & odom)
+{
+  odometry_ = odom;
+}
+
 void MinimalStackOfTasks::fillSensors(std::map<std::string,dgsot::SensorValues> & sensor)
 {
-  if (position_.size() == 0)
-    return;
-
-  sensor["joints"].setName("joints");
-  sensor["joints"].setValues(position_);
+  if (position_.size() != 0)
+  {
+    sensor["joints"].setName("joints");
+    sensor["joints"].setValues(position_);
+  }
+  if (odometry_.size() != 0)
+  {
+    sensor["odometry"].setName("odometry");
+    sensor["odometry"].setValues(odometry_);
+  }
 }
 
 void MinimalStackOfTasks::onExecute()
@@ -237,6 +256,25 @@ void positionCallback(const dynamic_graph_bridge_msgs::Vector & msg)
   }
 }
 
+void jointStatesCallback(const sensor_msgs::JointState & msg)
+{
+  if(msg.position.size() != 0)
+  {
+    m->setPosition(msg.position);
+  }
+}
+
+void odometryCallback(const nav_msgs::Odometry & msg)
+{
+  std::vector<double> odom(6,0);
+  odom[0] = msg.pose.pose.position.x;
+  odom[1] = msg.pose.pose.position.y;
+  odom[2] = msg.pose.pose.position.z;
+  tf2::Quaternion q(msg.pose.pose.orientation.x, msg.pose.pose.orientation.y, msg.pose.pose.orientation.z, msg.pose.pose.orientation.w);
+  tf2::Matrix3x3 mat(q);
+  mat.getRPY(odom[3],odom[4],odom[5]);
+  m->setOdometry(odom);
+}
 
 int main (int argc, char** argv)
 {
@@ -247,6 +285,7 @@ int main (int argc, char** argv)
 
   //substrack to feedback
   ros::Subscriber sub = nh.subscribe("positionFeedback", 1000, positionCallback);
+  ros::Subscriber odom_sub;
 
   ros::ServiceServer service = nh.advertiseService<std_srvs::Empty::Request, std_srvs::Empty::Response>
     ("start_dynamic_graph", boost::bind(callback, m, _1, _2));
@@ -256,12 +295,19 @@ int main (int argc, char** argv)
   {
     ROS_ERROR("robot param not given");
   }
-  
+
   boost::algorithm::to_lower(robot);
 
   if (robot == "pr2")
   {
     m->setRobot(PR2);
+    frequency = 1000;
+  }
+  else if (robot == "boxy")
+  {
+    m->setRobot(BOXY);
+    sub = nh.subscribe("/joint_states", 1000, jointStatesCallback);
+    odom_sub = nh.subscribe("/odom", 1000, odometryCallback);
     frequency = 1000;
   }
   else if (robot == "hrp4")
